@@ -77,12 +77,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('POSTGRES_HOST', 'licenses'),
-        'USER': os.getenv('POSTGRES_USER', 'licenses'),
-        'PASSWORD': os.getenv('POSTGRES_USER', 'licenses'),
-        'HOST': os.getenv('POSTGRES_HOST', 'postgres'),
-        'PORT': int(os.getenv('POSTGRES_PORT', 5432)),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('SQL_NAME', 'licenses'),
+        'USER': os.getenv('SQL_USER', 'licenses'),
+        'PASSWORD': os.getenv('SQL_PASSWORD', 'licenses'),
+        'HOST': os.getenv('SQL_HOST', 'mariadb'),
+        'PORT': int(os.getenv('SQL_PORT', 3306)),
     }
 }
 
