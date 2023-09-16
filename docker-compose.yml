@@ -30,3 +30,22 @@ services:
       test: ["CMD", "mariadb-admin", "ping", "-h", "mariadb", "--silent"]
       timeout: 10s
       retries: 6
+
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
+
+  celery-worker:
+    build:
+      context: ./license_portal
+    volumes:
+      - ./license_portal:/app
+    working_dir: /app
+    command: bash -c "celery -A licenses worker --loglevel=info"
+    links:
+      - mariadb
+      - redis
+    depends_on:
+      - mariadb
+      - redis
