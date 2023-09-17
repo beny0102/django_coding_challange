@@ -18,10 +18,14 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
+from licenses.views import GenerateLicenseView
+
 router = routers.DefaultRouter()
+# router.register(r'licenses', GenerateLicenseViewSet, basename='licenses')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     path('api/v1/', include(router.urls)),
+    path('api/v1/licenses/', GenerateLicenseView.as_view()),
     path('api/auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

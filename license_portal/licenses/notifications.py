@@ -11,9 +11,9 @@ DEFAULT_FROM_EMAIL = 'noreply@email.com'
 class EmailNotification:
     """ A convenience class to send email notifications
     """
-    subject = None  # type: str
+    subject = 'License Expiration'  # type: str
     from_email = DEFAULT_FROM_EMAIL  # type: str
-    template_path = None  # type: str
+    template_path = "email_templates/notification_email.html"  # type: str
 
     @classmethod
     def load_template(cls) -> Template:

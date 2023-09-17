@@ -21,10 +21,6 @@ app.conf.beat_schedule = {
         'task': 'licenses.tasks.check_licenses',
         'schedule': 60.0,
     },
-    'send-mails': {
-        'task': 'licenses.tasks.send_mails',
-        'schedule': 60.0,
-    },
 }
 
 

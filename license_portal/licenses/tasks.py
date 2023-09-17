@@ -1,16 +1,20 @@
 from datetime import datetime
 from celery import shared_task
 from .models import License, LicenseType, Package
-from pytz import utc
 from django.utils import timezone
 from django.core import mail
+from licenses.notifications import EmailNotification
 task_queue_list = {}
 
 @shared_task
 def check_licenses():
+    print("Checking licenses...")
+    print(f"Timezone: {timezone.now()}")
     active_licenses = License.objects.filter(expiration_datetime__gte=timezone.now())
     package_types = Package.get_choices()
+    licenses_types = LicenseType.get_choices()
     print(f"Active licenses: {active_licenses.count()}")
+
     for license in active_licenses:
         if(license.id not in task_queue_list):
             print(f'adding license {license.id} to task queue list')
@@ -21,46 +25,36 @@ def check_licenses():
             queue_tasks(license)
 
         
-        days_left = (license.expiration_datetime - timezone.now()).days
-        print(f"Client: {license.client.client_name} - Package: {package_types[license.package][0]} - Expiration: {license.expiration_datetime} - days left {days_left}")
+        # days_left = (license.expiration_datetime - timezone.now()).days
+        # print(f"Client: {license.client.client_name} - Package: {package_types[license.package][0]} - Expiration: {license.expiration_datetime} - days left {days_left}")
         pass
 
     for license_id, license in task_queue_list.items():
         print(f"License: {license_id} - Expiration: {license['expiration_datetime']}")
         for task in license['scheduled_tasks']:
+            if(task['sent']): continue
             print(f"\tTask: {task['task']} - Schedule: {task['schedule']}")
         pass
-
-@shared_task
-def send_mails():
-    licenses_types = LicenseType.get_choices()
-    package_types = Package.get_choices()
+    
     print("Sending mails...")
     for license_id, license in task_queue_list.items():
-        task_to_remove = []
         for task in license['scheduled_tasks']:
             schedule = task['schedule']
-            if(schedule > timezone.now() and schedule < timezone.now() + timezone.timedelta(minutes=1)):
+            isInTime = schedule > timezone.now() - timezone.timedelta(minutes=5) and schedule < timezone.now() + timezone.timedelta(minutes=5)
+            # print(f"Task: {task['task']} - Schedule: {schedule} - isInTime: {isInTime}")
+            if(isInTime and not task['sent']):
                 license = License.objects.get(id=license_id)
-                task_to_remove.append(task)
-
-                mail_body = f'''
-                    This is a reminder that the license with id: {license.id} will expire soon.
-                    license type: {licenses_types[license.license_type][0]}
-                    package: {package_types[license.package][0]}
-                    expiration date: {license.expiration_datetime}
-                    poc contact name: {license.client.poc_contact_name}
-                    poc contact email: {license.client.poc_contact_email}
-                    '''
+                task['sent'] = True
+                context = {
+                    'license_id': license.id,
+                    'license_type': licenses_types[license.license_type][0],
+                    'license_package': package_types[license.package][0],
+                    'license_expiration': license.expiration_datetime,
+                    'poc_name': license.client.poc_contact_name,
+                    'poc_email': license.client.poc_contact_email
+                }
                 print(f"Sending mail for task {task['task']}")
-                print(mail_body)
-
-                mail.send_mail(
-                    'License Expiration',
-                    mail_body
-                )
-        for task in task_to_remove:
-            license['scheduled_tasks'].remove(task)
+                EmailNotification.send_notification([license.client.admin_poc.email], context)
 
 def next_monday(date : datetime) -> datetime:
     """
@@ -80,13 +74,13 @@ def queue_tasks(license: License):
 
     tasks_to_schedule = []
     if(_120_days_before_expiration > timezone.now()):
-        tasks_to_schedule.append({'task': 'licenses.tasks.license_120_days_before_expiration', 'schedule': _120_days_before_expiration})
+        tasks_to_schedule.append({'task': 'licenses.tasks.license_120_days_before_expiration', 'schedule': _120_days_before_expiration, 'sent': False})
     # if(_30_days_before_expiration > timezone.now()):
-    #     tasks_to_schedule.append({'task': 'licenses.tasks.license_30_days_before_expiration', 'schedule': _30_days_before_expiration})
+    #     tasks_to_schedule.append({'task': 'licenses.tasks.license_30_days_before_expiration', 'schedule': _30_days_before_expiration, 'sent': False'})
     if(month_left_and_monday > timezone.now()):
-        tasks_to_schedule.append({'task': 'licenses.tasks.license_month_left_and_monday', 'schedule': month_left_and_monday})
+        tasks_to_schedule.append({'task': 'licenses.tasks.license_month_left_and_monday', 'schedule': month_left_and_monday, 'sent': False})
     if(_7_days_before_expiration > timezone.now()):
-        tasks_to_schedule.append({'task': 'licenses.tasks.license_7_days_before_expiration', 'schedule': _7_days_before_expiration})
+        tasks_to_schedule.append({'task': 'licenses.tasks.license_7_days_before_expiration', 'schedule': _7_days_before_expiration, 'sent': False})
     
     task_queue_list[license.id]['scheduled_tasks'] = tasks_to_schedule
     pass
