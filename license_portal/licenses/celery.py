@@ -16,6 +16,17 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
 
+app.conf.beat_schedule = {
+    'check-licenses': {
+        'task': 'licenses.tasks.check_licenses',
+        'schedule': 60.0,
+    },
+    'send-mails': {
+        'task': 'licenses.tasks.send_mails',
+        'schedule': 60.0,
+    },
+}
+
 
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):

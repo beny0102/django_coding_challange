@@ -49,3 +49,16 @@ services:
     depends_on:
       - mariadb
       - redis
+  celery-beat:
+    build:
+      context: ./license_portal
+    volumes:
+      - ./license_portal:/app
+    working_dir: /app
+    command: bash -c "celery -A licenses beat --loglevel=info"
+    links:
+      - mariadb
+      - redis
+    depends_on:
+      - mariadb
+      - redis

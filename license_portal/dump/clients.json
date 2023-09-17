@@ -1,0 +1,52 @@
+[
+    {
+        "model": "licenses.client",
+        "pk": 1,
+        "fields": {
+            "client_name": "Client 1",
+            "poc_contact_name": "Client 1 POC",
+            "poc_contact_email": "client1@mail.com",
+            "admin_poc_id": 1
+        }
+    },
+    {
+        "model": "licenses.client",
+        "pk": 2,
+        "fields": {
+            "client_name": "Client 2",
+            "poc_contact_name": "Client 2 POC",
+            "poc_contact_email": "client2@mail.com",
+            "admin_poc_id": 1
+        }
+    },
+    {
+        "model": "licenses.client",
+        "pk": 3,
+        "fields": {
+            "client_name": "Client 3",
+            "poc_contact_name": "Client 3 POC",
+            "poc_contact_email": "client3@mail.com",
+            "admin_poc_id": 1
+        }
+    },
+    {
+        "model": "licenses.client",
+        "pk": 4,
+        "fields": {
+            "client_name": "Client 4",
+            "poc_contact_name": "Client 4 POC",
+            "poc_contact_email": "client4@mail.com",
+            "admin_poc_id": 1
+        }
+    },
+    {
+        "model": "licenses.client",
+        "pk": 5,
+        "fields": {
+            "client_name": "Client 5",
+            "poc_contact_name": "Client 5 POC",
+            "poc_contact_email": "client5@mail.com",
+            "admin_poc_id": 1
+        }
+    }
+]
