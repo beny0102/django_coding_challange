@@ -55,3 +55,10 @@ class Client(models.Model):
     poc_contact_email = models.EmailField()
 
     admin_poc = models.ForeignKey(User, limit_choices_to={'is_staff': True}, on_delete=models.CASCADE)
+
+class MailLog(models.Model):
+    """ A log of mails sent
+    """
+    license = models.ForeignKey(License, on_delete=models.CASCADE)
+    sent_datetime = models.DateTimeField(auto_now=True)
+    reason = models.CharField(max_length=120)

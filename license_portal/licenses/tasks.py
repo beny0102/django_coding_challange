@@ -1,8 +1,7 @@
 from datetime import datetime
 from celery import shared_task
-from .models import License, LicenseType, Package
+from .models import License, LicenseType, Package, MailLog
 from django.utils import timezone
-from django.core import mail
 from licenses.notifications import EmailNotification
 task_queue_list = {}
 
@@ -54,6 +53,12 @@ def check_licenses():
                     'poc_email': license.client.poc_contact_email
                 }
                 print(f"Sending mail for task {task['task']}")
+                mail_log = MailLog.objects.create(
+                    license=license,
+                    sent_datetime=timezone.now(),
+                    reason=task['task']
+                )
+                mail_log.save()
                 EmailNotification.send_notification([license.client.admin_poc.email], context)
 
 def next_monday(date : datetime) -> datetime:

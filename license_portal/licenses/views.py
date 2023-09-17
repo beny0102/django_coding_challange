@@ -4,9 +4,12 @@ from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ViewSet, ModelViewSet
+from rest_framework import permissions
 
-from licenses.models import License, LicenseType, Package, Client
+from licenses.models import License, LicenseType, Package, Client, MailLog
+
+from licenses.serializers import MailLogSerializer, LicenseSerializer
 
 import random
 
@@ -50,3 +53,29 @@ class GenerateLicenseView(APIView):
             'client': client.id,
             'exporation_datetime': license.expiration_datetime
         })
+class MailLogViewSet(ViewSet):
+    """
+    List of the mail logs
+    """
+    def list(self, request: HttpRequest, quantity: int):
+        queryset = MailLog.objects.all().order_by('-sent_datetime')[:quantity]
+        serializer = MailLogSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+class LicenseAllViewSet(ModelViewSet):
+    """
+    List of the licenses
+    """
+    queryset = License.objects.all()
+    serializer_class = LicenseSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def retrieve(self, request: HttpRequest, pk=None):
+        try:
+            queryset = License.objects.all()
+            license = queryset.get(pk=pk)
+            serializer = LicenseSerializer(license)
+            # if not exists return 404
+            return Response(serializer.data)
+        except License.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)

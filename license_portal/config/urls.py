@@ -18,14 +18,15 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
-from licenses.views import GenerateLicenseView
+from licenses.views import GenerateLicenseView, MailLogViewSet, LicenseAllViewSet
 
 router = routers.DefaultRouter()
-# router.register(r'licenses', GenerateLicenseViewSet, basename='licenses')
+router.register(r'licenses', LicenseAllViewSet, basename='licenses')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     path('api/v1/', include(router.urls)),
-    path('api/v1/licenses/', GenerateLicenseView.as_view()),
+    path('api/v1/random/license', GenerateLicenseView.as_view()),
+    path('api/v1/maillogs/<int:quantity>/', MailLogViewSet.as_view({'get': 'list'})),
     path('api/auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
