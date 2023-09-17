@@ -51,7 +51,7 @@ class GenerateLicenseView(APIView):
             'license_type': license_type,
             'package': package,
             'client': client.id,
-            'exporation_datetime': license.expiration_datetime
+            'expiration_datetime': license.expiration_datetime
         })
 class MailLogViewSet(ViewSet):
     """

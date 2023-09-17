@@ -91,8 +91,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.getenv('SQL_NAME', 'licenses'),
-        'USER': os.getenv('SQL_USER', 'licenses'),
-        'PASSWORD': os.getenv('SQL_PASSWORD', 'licenses'),
+        'USER': os.getenv('SQL_USER', 'root'),
+        'PASSWORD': os.getenv('SQL_PASSWORD', 'root'),
         'HOST': os.getenv('SQL_HOST', 'mariadb'),
         'PORT': int(os.getenv('SQL_PORT', 3306)),
     }
