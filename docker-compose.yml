@@ -9,7 +9,7 @@ services:
     ports:
       - '8080:8080'
     working_dir: /app
-    command: bash -c "python manage.py migrate && python manage.py createsuperuser --no-input || true && python manage.py runserver 0.0.0.0:8080"
+    command: bash -c "python manage.py migrate && python manage.py createsuperuser --no-input && python manage.py loaddata dump/clients.json dump/licenses.json || true && python manage.py runserver 0.0.0.0:8080"
     environment:
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SUPERUSER_USERNAME=admin
@@ -22,8 +22,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: licenses
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      MYSQL_USER: licenses
+      MYSQL_PASSWORD: licenses
     ports:
       - '3306:3306'
     healthcheck:
@@ -35,6 +35,10 @@ services:
     image: redis
     ports:
       - '6379:6379'
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 10s
+      retries: 6
 
   celery-worker:
     build:
@@ -47,8 +51,10 @@ services:
       - mariadb
       - redis
     depends_on:
-      - mariadb
-      - redis
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
   celery-beat:
     build:
       context: ./license_portal
@@ -60,5 +66,7 @@ services:
       - mariadb
       - redis
     depends_on:
-      - mariadb
-      - redis
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
