@@ -17,6 +17,17 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+  license-front:
+    links:
+      - license-server
+    build:
+      context: ./license_front
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./license_front:/app
+    working_dir: /app
+    command: bash -c "npm install && npm run dev"
   mariadb:
     image: mariadb
     environment:
